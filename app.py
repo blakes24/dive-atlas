@@ -1,5 +1,6 @@
 import os
 import requests
+import logging
 
 from flask import Flask, render_template, flash, redirect, session, g, request
 from flask_debugtoolbar import DebugToolbarExtension
@@ -13,6 +14,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+
+logging.basicConfig(level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -95,6 +98,38 @@ def logout():
     return redirect("/")
 
 
+@app.route("/user/edit", methods=["GET", "POST"])
+def edit_profile():
+    """Update profile for current user."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = UserAddForm(obj=g.user)
+
+    if form.validate_on_submit():
+        user = User.authenticate(g.user.username, form.password.data)
+
+        if user:
+            try:
+                user.username = (form.username.data,)
+                user.email = (form.email.data,)
+
+                db.session.commit()
+
+                flash("Profile Updated", "success")
+                return redirect("/")
+
+            except IntegrityError:
+                db.session().rollback()
+                flash("Username or email is already taken.", "danger")
+                return redirect("/user/edit")
+
+        flash("Invalid credentials.", "danger")
+
+    return render_template("user-form.html", form=form, user_id=g.user.id)
+
+
 @app.route("/sites/search", methods=["POST"])
 def get_sites():
     """Send request to api to get list of dive sites based on provided search parameters"""
@@ -108,7 +143,8 @@ def get_sites():
 
 
 @app.errorhandler(Exception)
-def server_error():
-    """Display error page."""
+def server_error(e):
+    """Display error page. Log error message with stack trace."""
+    app.logger.error("An error occured", e)
     db.session().rollback()
     return render_template("error.html"), 500
