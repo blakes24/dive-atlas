@@ -11,7 +11,7 @@ from sqlalchemy import exc
 from models import db, User
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///dive_test"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
 
 
 # Create tables
@@ -83,3 +83,29 @@ class ModelTestCase(TestCase):
         )
 
         self.assertRaises(exc.IntegrityError, db.session.commit)
+
+    def test_authenticate_valid(self):
+        """Does authentication work?"""
+
+        u = User.authenticate("testyuser", "password")
+
+        # authenticate should return the user
+        self.assertEqual(u, self.u)
+
+    def test_invalid_username(self):
+        """Does invalid username fail?"""
+
+        u = User.authenticate("wrong", "password")
+
+        # authenticate should return false
+        self.assertNotEqual(u, self.u)
+        self.assertFalse(u)
+
+    def test_invalid_password(self):
+        """Does invalid username fail?"""
+
+        u = User.authenticate("testyuser", "nope")
+
+        # authenticate should return false
+        self.assertNotEqual(u, self.u)
+        self.assertFalse(u)
