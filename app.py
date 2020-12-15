@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from models import db, connect_db, User
-from forms import UserAddForm
+from forms import UserAddForm, LoginForm
 
 from dotenv import load_dotenv
 
@@ -64,8 +64,38 @@ def signup():
 
     return render_template("signup.html", form=form)
 
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Handle user login."""
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = User.authenticate(form.username.data, form.password.data)
+
+        if user:
+            session["user_id"] = user.id
+            flash(f"Hello, {user.username}!", "success")
+            return redirect("/")
+
+        flash("Invalid credentials.", "danger")
+
+    return render_template("/login.html", form=form)
+
+
+@app.route("/logout")
+def logout():
+    """Handle logout of user."""
+
+    session.pop("user_id", None)
+
+    flash("You have been logged out.", "success")
+    return redirect("/")
+
+
 @app.errorhandler(Exception)
 def server_error():
     """Display error page."""
     db.session().rollback()
-    return render_template('error.html'), 500
+    return render_template("error.html"), 500
