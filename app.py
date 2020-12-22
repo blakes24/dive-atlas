@@ -1,6 +1,7 @@
 import os
+import requests
 
-from flask import Flask, render_template, flash, redirect, session, g
+from flask import Flask, render_template, flash, redirect, session, g, request
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
@@ -92,6 +93,18 @@ def logout():
 
     flash("You have been logged out.", "success")
     return redirect("/")
+
+
+@app.route("/sites/search", methods=["POST"])
+def get_sites():
+    """Send request to api to get list of dive sites based on provided search parameters"""
+    params = request.json
+
+    res = requests.get("http://api.divesites.com", params=params)
+
+    data = res.json()
+
+    return data
 
 
 @app.errorhandler(Exception)

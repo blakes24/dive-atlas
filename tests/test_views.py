@@ -181,3 +181,28 @@ class ViewTestCase(TestCase):
                 '<a class="nav-link" href="/bucketlist">Bucket List</a>', html
             )
             self.assertNotIn('<a class="nav-link" href="/login">Sign In</a>', html)
+
+    def test_site_search_term(self):
+        """Does it return results from the API when given a search term?"""
+        with self.client as c:
+            resp = c.post("/sites/search", json={"mode": "search", "str": "pinnacle"})
+
+            res = resp.get_data(as_text=True)
+
+            self.assertIn("true", res)
+            self.assertIn("pinnacle", res)
+            self.assertIn('"We found', res)
+
+    def test_site_search_coord(self):
+        """Does it return results from the API when given coordinates?"""
+        with self.client as c:
+            resp = c.post(
+                "/sites/search",
+                json={"mode": "sites", "lat": 32, "lng": -117, "dist": 100},
+            )
+
+            res = resp.get_data(as_text=True)
+
+            self.assertIn("true", res)
+            self.assertIn('"32"', res)
+            self.assertIn('"-117"', res)
