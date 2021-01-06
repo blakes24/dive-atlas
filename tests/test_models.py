@@ -8,7 +8,7 @@ from app import app
 
 from unittest import TestCase
 from sqlalchemy import exc
-from models import db, User
+from models import db, User, Dive_site
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
@@ -109,3 +109,31 @@ class ModelTestCase(TestCase):
         # authenticate should return false
         self.assertNotEqual(u, self.u)
         self.assertFalse(u)
+
+    def test_dive_site_model(self):
+        """Does Dive_site modal work?"""
+        site = Dive_site(
+            name="Test-site",
+            id=22,
+            lng=20,
+            lat=10,
+            description="Not real.",
+            location="city, country",
+        )
+
+        db.session.add(site)
+        db.session.commit()
+
+        self.assertEqual(site.name, "Test-site")
+        self.assertEqual(site.lng, 20)
+        self.assertEqual(site.lat, 10)
+        self.assertEqual(site.description, "Not real.")
+        self.assertEqual(site.location, "city, country")
+        self.assertEqual(len(Dive_site.query.all()), 1)
+
+    def test_dive_site_missing(self):
+        """Does it raise an error if its missing required arguments?"""
+        site = Dive_site(name="Test-site", id=22, lat=10, description="Not real.")
+
+        db.session.add(site)
+        self.assertRaises(exc.IntegrityError, db.session.commit)
