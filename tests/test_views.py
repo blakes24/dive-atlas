@@ -42,6 +42,14 @@ class ViewTestCase(TestCase):
         u = User.query.get(1111)
         self.u = u
 
+        u2 = User.signup(
+            email="tester22@test.com",
+            username="tester22",
+            password="password22",
+        )
+        db.session.add(u2)
+        db.session.commit()
+
     def tearDown(self):
         db.session.rollback()
 
@@ -182,6 +190,79 @@ class ViewTestCase(TestCase):
             )
             self.assertNotIn('<a class="nav-link" href="/login">Sign In</a>', html)
 
+    def test_edit_user(self):
+        """Does it edit a user's info?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.post(
+                "/user/edit",
+                data={
+                    "username": "testuser2",
+                    "email": "test@test.com",
+                    "password": "password",
+                },
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("testuser2</a>", html)
+
+    def test_edit_user_invalid(self):
+        """Does it show an error message if user tries to edit profile with wrong password?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.post(
+                "/user/edit",
+                data={
+                    "username": "testuser2",
+                    "email": "test@test.com",
+                    "password": "wrongpwd",
+                },
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Invalid credentials.", html)
+
+    def test_edit_user_duplicate(self):
+        """Does it show an error message if user tries to change to taken username/email?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.post(
+                "/user/edit",
+                data={
+                    "username": "tester22",
+                    "email": "test@test.com",
+                    "password": "password",
+                },
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Username or email is already taken.", html)
+
+    def test_edit_logged_out(self):
+        """Does it redirect user if not logged in?"""
+        with self.client as c:
+
+            resp = c.get(
+                "/user/edit",
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
     def test_site_search_term(self):
         """Does it return results from the API when given a search term?"""
         with self.client as c:
@@ -206,3 +287,14 @@ class ViewTestCase(TestCase):
             self.assertIn("true", res)
             self.assertIn('"32"', res)
             self.assertIn('"-117"', res)
+
+    def test_error_handler(self):
+        """Does it display error page?"""
+        with self.client as c:
+            # "/" route should not work with post
+            resp = c.post("/")
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 500)
+            self.assertIn("Looks like something went wrong.", html)
