@@ -49,3 +49,16 @@ class User(db.Model):
                 return user
 
         return False
+
+
+class Dive_site(db.Model):
+    """Dive site"""
+
+    __tablename__ = "dive_sites"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    lat = db.Column(db.Float, nullable=False)
+    lng = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text)
+    location = db.Column(db.Text, nullable=False)

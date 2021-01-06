@@ -1,12 +1,13 @@
 import os
 import requests
 import logging
+import reverse_geocode
 
 from flask import Flask, render_template, flash, redirect, session, g, request
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from models import db, connect_db, User
+from models import db, connect_db, User, Dive_site
 from forms import UserAddForm, LoginForm
 
 from dotenv import load_dotenv
@@ -159,6 +160,41 @@ def get_sites():
     data = res.json()
 
     return data
+
+
+@app.route("/sites/<int:site_id>")
+def show_site(site_id):
+    """Show site details"""
+
+    site = Dive_site.query.get(site_id)
+
+    if not site:
+        res = requests.get(
+            "http://api.divesites.com", params={"mode": "detail", "siteid": site_id}
+        )
+
+        data = res.json()
+        lat = float(data["site"]["lat"])
+        lng = float(data["site"]["lng"])
+        coords = [(lat, lng)]
+        loc = reverse_geocode.search(coords)
+        location = f"{loc[0]['city']}, {loc[0]['country']}"
+
+        new_site = Dive_site(
+            id=site_id,
+            name=data["site"]["name"],
+            lng=lng,
+            lat=lat,
+            description=data["site"]["description"],
+            location=location,
+        )
+
+        db.session.add(new_site)
+        db.session.commit()
+
+        return render_template("site-detail.html", site=new_site)
+
+    return render_template("site-detail.html", site=site)
 
 
 @app.errorhandler(Exception)

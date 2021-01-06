@@ -8,7 +8,7 @@ from app import app
 
 from unittest import TestCase
 
-from models import db, User
+from models import db, User, Dive_site
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
 
@@ -284,6 +284,22 @@ class ViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Access unauthorized.", html)
 
+    ##### Test dive site views #####
+
+    def setup_dive_sites(self):
+        """Setup for dive site tests."""
+        site1 = Dive_site(
+            name="Site1",
+            id=1,
+            lng=20,
+            lat=10,
+            description="Not real.",
+            location="somewhere",
+        )
+
+        db.session.add(site1)
+        db.session.commit()
+
     def test_site_search_term(self):
         """Does it return results from the API when given a search term?"""
         with self.client as c:
@@ -308,6 +324,64 @@ class ViewTestCase(TestCase):
             self.assertIn("true", res)
             self.assertIn('"32"', res)
             self.assertIn('"-117"', res)
+
+    def test_show_site(self):
+        """Does it display site details?"""
+        self.setup_dive_sites()
+
+        with self.client as c:
+            resp = c.get("/sites/1", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<h1 class="text-center">Site1</h1>', html)
+
+    def test_show_site_api(self):
+        """Does it get site info from api, add to database, and display details?"""
+        self.setup_dive_sites()
+
+        with self.client as c:
+            resp = c.get("/sites/17251", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(len(Dive_site.query.all()), 2)
+            self.assertIn('<h1 class="text-center">Treasure Island</h1>', html)
+
+    def test_show_site_logged_out(self):
+        """Does it display logged out site details view?"""
+        self.setup_dive_sites()
+
+        with self.client as c:
+            resp = c.get("/sites/1", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<p><a href="/login">Sign in</a> to add a review </p>', html)
+            self.assertNotIn(
+                '<button class="dropdown-item" id="bucket-list-add" data-id="1">Add to bucket list</button>',
+                html,
+            )
+
+    def test_show_site_logged_in(self):
+        """Does it display logged in site details view?"""
+        self.setup_dive_sites()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.get("/sites/1", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(
+                '<button class="dropdown-item" id="bucket-list-add" data-id="1">Add to bucket list</button>',
+                html,
+            )
+            self.assertNotIn(
+                '<p><a href="/login">Sign in</a> to add a review </p>', html
+            )
 
     def test_error_handler(self):
         """Does it display error page?"""
