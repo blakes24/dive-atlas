@@ -15,7 +15,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
-logging.basicConfig(level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG,
+    format=f"%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s",
+)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -128,6 +131,22 @@ def edit_profile():
         flash("Invalid credentials.", "danger")
 
     return render_template("user-form.html", form=form, user_id=g.user.id)
+
+
+@app.route("/user/delete", methods=["POST"])
+def delete_user():
+    """Delete user."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    session.pop("user_id", None)
+
+    db.session.delete(g.user)
+    db.session.commit()
+    flash("User Deleted", "danger")
+
+    return redirect("/")
 
 
 @app.route("/sites/search", methods=["POST"])
