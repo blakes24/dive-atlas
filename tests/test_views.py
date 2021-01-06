@@ -263,6 +263,27 @@ class ViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Access unauthorized.", html)
 
+    def test_delete_user(self):
+        """Does it delete the user?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.post("/user/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("User Deleted", html)
+
+    def test_delete_user_logged_out(self):
+        """Does it redirect userif they are logged out?"""
+        with self.client as c:
+            resp = c.post("/user/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
     def test_site_search_term(self):
         """Does it return results from the API when given a search term?"""
         with self.client as c:
