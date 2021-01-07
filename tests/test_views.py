@@ -448,6 +448,20 @@ class ViewTestCase(TestCase):
 
             self.assertEqual(data, {'message': 'This site is already in your bucket list.'})
 
+    def test_bucket_list_delete(self):
+        """Does it delete a site from user's bucket list?"""
+        self.setup_bucket_list()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u.id
+
+            resp = c.post("/bucketlist/1/delete")
+            data = resp.json
+
+            self.assertEqual(data, {'message': 'Deleted'})
+            self.assertEqual(len(Bucket_list_site.query.all()), 0)
+
     def test_error_handler(self):
         """Does it display error page?"""
         with self.client as c:

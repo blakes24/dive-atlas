@@ -78,3 +78,18 @@ $('#bucket-list-add').on('click', async function addToList() {
     </button> </div>`);
 	$('#msg').append(alert);
 });
+
+// deletes dive site from user's bucket list
+$('#delete').on('click', async function deleteSite() {
+	// get site id
+	const id = $(this).attr('data-id');
+	// send to server
+	let res = await axios.post(`/bucketlist/${id}/delete`);
+	// add alert
+	const alert = $(`<div class="alert alert-info alert-dismissible fade show" role="alert"> ${res.data
+		.message} <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+    </button> </div>`);
+	$(this).closest('li').remove();
+	$('#msg').append(alert);
+});
