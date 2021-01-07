@@ -64,3 +64,17 @@ function clearMarkers() {
 		marker.remove();
 	}
 }
+
+// adds current dive site to user's bucket list
+$('#bucket-list-add').on('click', async function addToList() {
+	// get site id
+	const id = $(this).attr('data-id');
+	// send to server
+	let res = await axios.post('/bucketlist', { id: id });
+	// add alert
+	const alert = $(`<div class="alert alert-info alert-dismissible fade show" role="alert"> ${res.data
+		.message} <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+    </button> </div>`);
+	$('#msg').append(alert);
+});
