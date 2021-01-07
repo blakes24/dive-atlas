@@ -8,7 +8,7 @@ from app import app
 
 from unittest import TestCase
 
-from models import db, User, Dive_site
+from models import db, User, Dive_site, Bucket_list_site
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
 
@@ -382,6 +382,71 @@ class ViewTestCase(TestCase):
             self.assertNotIn(
                 '<p><a href="/login">Sign in</a> to add a review </p>', html
             )
+
+    ##### Test bucket list views #####
+
+    def setup_bucket_list(self):
+
+        site1 = Dive_site(name="Site1", id=1, lng=20, lat=10, description="Not real.", location="somewhere")
+        site2 = Dive_site(name="Site2", id=2, lng=50, lat=30, description="Fake", location="someplace")
+        db.session.add_all([site1, site2])
+        db.session.commit()
+
+        bl_site = Bucket_list_site(dive_site_id=1, user_id=self.u.id)
+        db.session.add(bl_site)
+        db.session.commit()
+
+    def test_show_bucket_list(self):
+        """Does it display user's bucket list?"""
+        self.setup_bucket_list()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u.id
+
+            resp = c.get("/bucketlist", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Site1</a>', html)
+            self.assertNotIn('Site2</a>', html)
+
+    def test_bucket_list_unauthorized(self):
+        """Does it redirect the user if they are not logged in?"""
+        self.setup_bucket_list()
+
+        with self.client as c:
+            resp = c.get("/bucketlist", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Access unauthorized.', html)
+
+    def test_bucket_list_add(self):
+        """Does it add a site to the user's bucket list?"""
+        self.setup_bucket_list()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u.id
+
+            resp = c.post("/bucketlist", json={"id":2})
+            data = resp.json
+
+            self.assertEqual(data, {'message': 'Site added to bucket list'})
+
+    def test_add_existing(self):
+        """Does it prevent user from adding duplicates to bucket list?"""
+        self.setup_bucket_list()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u.id
+
+            resp = c.post("/bucketlist", json={"id":1})
+            data = resp.json
+
+            self.assertEqual(data, {'message': 'This site is already in your bucket list.'})
 
     def test_error_handler(self):
         """Does it display error page?"""

@@ -14,7 +14,7 @@ def connect_db(app):
 
 
 class User(db.Model):
-    """User info"""
+    """User info."""
 
     __tablename__ = "users"
 
@@ -22,6 +22,8 @@ class User(db.Model):
     username = db.Column(db.Text, nullable=False, unique=True)
     email = db.Column(db.Text, nullable=False, unique=True)
     password = db.Column(db.Text, nullable=False)
+
+    bucket_list = db.relationship("Dive_site", secondary="bucket_list_sites")
 
     def __repr__(self):
         """Display id, username, and email."""
@@ -52,7 +54,7 @@ class User(db.Model):
 
 
 class Dive_site(db.Model):
-    """Dive site"""
+    """Dive site."""
 
     __tablename__ = "dive_sites"
 
@@ -62,3 +64,13 @@ class Dive_site(db.Model):
     lng = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
     location = db.Column(db.Text, nullable=False)
+
+
+class Bucket_list_site(db.Model):
+    """Dive site in user's bucket list."""
+
+    __tablename__ = 'bucket_list_sites'
+
+    id = db.Column(db.Integer, primary_key=True)
+    dive_site_id = db.Column(db.Integer, db.ForeignKey('dive_sites.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)

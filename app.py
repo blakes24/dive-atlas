@@ -7,7 +7,7 @@ from flask import Flask, render_template, flash, redirect, session, g, request
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from models import db, connect_db, User, Dive_site
+from models import db, connect_db, User, Dive_site, Bucket_list_site
 from forms import UserAddForm, LoginForm
 
 from dotenv import load_dotenv
@@ -195,6 +195,28 @@ def show_site(site_id):
         return render_template("site-detail.html", site=new_site)
 
     return render_template("site-detail.html", site=site)
+
+
+@app.route('/bucketlist', methods=["GET", "POST"])
+def add_bucketlist_site():
+    """Add site to user's bucket list."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    if request.method == 'POST':
+        dive_site_id = request.json['id']
+        site = Dive_site.query.get(dive_site_id)
+        if site in g.user.bucket_list:
+            return {'message': 'This site is already in your bucket list.'}
+        bl_site = Bucket_list_site(dive_site_id=dive_site_id, user_id=g.user.id)
+        db.session.add(bl_site)
+        db.session.commit()
+        return {'message': 'Site added to bucket list'}
+
+    sites = g.user.bucket_list
+
+    return render_template('bucket-list.html', sites=sites)
 
 
 @app.errorhandler(Exception)

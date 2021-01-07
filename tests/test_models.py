@@ -8,11 +8,10 @@ from app import app
 
 from unittest import TestCase
 from sqlalchemy import exc
-from models import db, User, Dive_site
+from models import db, User, Dive_site, Bucket_list_site
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
-
 
 # Create tables
 db.create_all()
@@ -23,7 +22,8 @@ class ModelTestCase(TestCase):
 
     def setUp(self):
         """Create test client, add sample data."""
-        User.query.delete()
+        db.drop_all()
+        db.create_all()
 
         u = User.signup(
             email="testy@test.com",
@@ -136,4 +136,38 @@ class ModelTestCase(TestCase):
         site = Dive_site(name="Test-site", id=22, lat=10, description="Not real.")
 
         db.session.add(site)
+        self.assertRaises(exc.IntegrityError, db.session.commit)
+
+    def test_bucket_list_model(self):
+        """Does Bucket_list model work?"""
+        site = Dive_site(
+            name="Test-site",
+            id=22,
+            lng=20,
+            lat=10,
+            description="Not real.",
+            location="city, country",
+        )
+        db.session.add(site)
+        db.session.commit()
+
+        bl_site = Bucket_list_site(dive_site_id=site.id, user_id=self.u.id)
+        db.session.add(bl_site)
+        db.session.commit()
+
+        self.assertEqual(len(self.u.bucket_list), 1)
+        self.assertEqual(self.u.bucket_list[0].name, "Test-site")
+
+    def test_bucket_list_missing(self):
+        """Does it raise an error if its missing required arguments?"""
+        bl_site = Bucket_list_site(user_id=self.u.id)
+
+        db.session.add(bl_site)
+        self.assertRaises(exc.IntegrityError, db.session.commit)
+
+    def test_bucket_list_invalid(self):
+        """Does it raise an error if it's passed an invalid foreign key?"""
+        bl_site = Bucket_list_site(dive_site_id=7, user_id=self.u.id)
+
+        db.session.add(bl_site)
         self.assertRaises(exc.IntegrityError, db.session.commit)

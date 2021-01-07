@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center">Bucket List</h1>
+<div id="msg"></div>
+<div class="container">
+    <ul id="site-list list-group">
+        {% for site in sites %}
+        <li class="list-group-item"><a href="/sites/{{site.id}}">{{site.name}}</a> <span><button class="btn btn-sm btn-danger px-2 py-0 float-right" id="delete" data-id="{{site.id}}">x</button></span></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
