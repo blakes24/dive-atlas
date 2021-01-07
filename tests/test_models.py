@@ -8,7 +8,7 @@ from app import app
 
 from unittest import TestCase
 from sqlalchemy import exc
-from models import db, User, Dive_site, Bucket_list_site
+from models import db, User, Dive_site, Bucket_list_site, Journal_entry
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
@@ -170,4 +170,40 @@ class ModelTestCase(TestCase):
         bl_site = Bucket_list_site(dive_site_id=7, user_id=self.u.id)
 
         db.session.add(bl_site)
+        self.assertRaises(exc.IntegrityError, db.session.commit)
+
+    def test_journal_entry_model(self):
+        """Does Journal_entry modal work?"""
+        site = Dive_site(
+            name="Test-site",
+            id=22,
+            lng=20,
+            lat=10,
+            description="Not real.",
+            location="city, country",
+        )
+        db.session.add(site)
+        db.session.commit()
+
+        entry = Journal_entry(
+            dive_site_id=site.id, user_id=self.u.id, rating=3, notes="ok"
+        )
+        db.session.add(entry)
+        db.session.commit()
+
+        self.assertEqual(len(self.u.dive_journal), 1)
+        self.assertEqual(self.u.dive_journal[0].rating, 3)
+
+    def test_journal_entry_missing(self):
+        """Does it raise an error if its missing required arguments?"""
+        entry = Journal_entry(user_id=self.u.id, rating=3)
+        db.session.add(entry)
+
+        self.assertRaises(exc.IntegrityError, db.session.commit)
+
+    def test_journal_entry_invalid(self):
+        """Does it raise an error if its passed an invalid foreign key?"""
+        entry = Journal_entry(dive_site_id=7, user_id=self.u.id, rating=3)
+        db.session.add(entry)
+
         self.assertRaises(exc.IntegrityError, db.session.commit)

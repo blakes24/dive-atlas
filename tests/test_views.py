@@ -8,7 +8,7 @@ from app import app
 
 from unittest import TestCase
 
-from models import db, User, Dive_site, Bucket_list_site
+from models import db, User, Dive_site, Bucket_list_site, Journal_entry
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
 
@@ -387,8 +387,17 @@ class ViewTestCase(TestCase):
 
     def setup_bucket_list(self):
 
-        site1 = Dive_site(name="Site1", id=1, lng=20, lat=10, description="Not real.", location="somewhere")
-        site2 = Dive_site(name="Site2", id=2, lng=50, lat=30, description="Fake", location="someplace")
+        site1 = Dive_site(
+            name="Site1",
+            id=1,
+            lng=20,
+            lat=10,
+            description="Not real.",
+            location="somewhere",
+        )
+        site2 = Dive_site(
+            name="Site2", id=2, lng=50, lat=30, description="Fake", location="someplace"
+        )
         db.session.add_all([site1, site2])
         db.session.commit()
 
@@ -402,14 +411,14 @@ class ViewTestCase(TestCase):
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.u.id
+                sess["user_id"] = self.u.id
 
             resp = c.get("/bucketlist", follow_redirects=True)
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('Site1</a>', html)
-            self.assertNotIn('Site2</a>', html)
+            self.assertIn("Site1</a>", html)
+            self.assertNotIn("Site2</a>", html)
 
     def test_bucket_list_unauthorized(self):
         """Does it redirect the user if they are not logged in?"""
@@ -420,7 +429,7 @@ class ViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('Access unauthorized.', html)
+            self.assertIn("Access unauthorized.", html)
 
     def test_bucket_list_add(self):
         """Does it add a site to the user's bucket list?"""
@@ -428,12 +437,12 @@ class ViewTestCase(TestCase):
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.u.id
+                sess["user_id"] = self.u.id
 
-            resp = c.post("/bucketlist", json={"id":2})
+            resp = c.post("/bucketlist", json={"id": 2})
             data = resp.json
 
-            self.assertEqual(data, {'message': 'Site added to bucket list'})
+            self.assertEqual(data, {"message": "Site added to bucket list"})
 
     def test_add_existing(self):
         """Does it prevent user from adding duplicates to bucket list?"""
@@ -441,12 +450,14 @@ class ViewTestCase(TestCase):
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.u.id
+                sess["user_id"] = self.u.id
 
-            resp = c.post("/bucketlist", json={"id":1})
+            resp = c.post("/bucketlist", json={"id": 1})
             data = resp.json
 
-            self.assertEqual(data, {'message': 'This site is already in your bucket list.'})
+            self.assertEqual(
+                data, {"message": "This site is already in your bucket list."}
+            )
 
     def test_bucket_list_delete(self):
         """Does it delete a site from user's bucket list?"""
@@ -454,13 +465,122 @@ class ViewTestCase(TestCase):
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.u.id
+                sess["user_id"] = self.u.id
 
             resp = c.post("/bucketlist/1/delete")
             data = resp.json
 
-            self.assertEqual(data, {'message': 'Deleted'})
+            self.assertEqual(data, {"message": "Deleted"})
             self.assertEqual(len(Bucket_list_site.query.all()), 0)
+
+    ##### Test dive journal views #####
+
+    def setup_dive_journal(self):
+
+        site1 = Dive_site(
+            name="Site1",
+            id=1,
+            lng=20,
+            lat=10,
+            description="Not real.",
+            location="somewhere",
+        )
+        site2 = Dive_site(
+            name="Site2", id=2, lng=50, lat=30, description="Fake", location="someplace"
+        )
+        db.session.add_all([site1, site2])
+        db.session.commit()
+
+        entry = Journal_entry(dive_site_id=1, user_id=self.u.id, rating=3, notes="ok")
+        db.session.add(entry)
+        db.session.commit()
+
+    def test_show_dive_journal(self):
+        """Does it display user's dive journal?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.get("/journal", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Site1</a>", html)
+            self.assertNotIn("Site2</a>", html)
+
+    def test_show_journal_unauthorized(self):
+        """Does it redirect the user if they are not logged in?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            resp = c.get("/journal", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
+    def test_journal_add_form(self):
+        """Does it display form to add site to dive journal?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.get("/journal/2/add", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Description (public)", html)
+
+    def test_journal_duplicate(self):
+        """Does it prevent user from adding duplicates to dive journal?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.get("/journal/1/add", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Site already in dive journal.", html)
+
+    def test_journal_add(self):
+        """Does it add site to dive journal?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess["user_id"] = self.u.id
+
+            resp = c.post(
+                "/journal/2/add",
+                data={"description": "dive site", "notes": "cool", "rating": 4},
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Site added to dive journal.", html)
+
+    def test_journal_add_unauthorized(self):
+        """Does it redirect the user if they are not logged in?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            resp = c.post(
+                "/journal/2/add",
+                data={"description": "dive site", "notes": "cool", "rating": 4},
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
 
     def test_error_handler(self):
         """Does it display error page?"""
