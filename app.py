@@ -219,6 +219,17 @@ def add_bucketlist_site():
     return render_template('bucket-list.html', sites=sites)
 
 
+@app.route("/bucketlist/<int:site_id>/delete", methods=["POST"])
+def delete_bucketlist_site(site_id):
+    """Deletes a site from bucket list and returns deleted message."""
+    site = Bucket_list_site.query.filter(Bucket_list_site.user_id == g.user.id, Bucket_list_site.dive_site_id == site_id).first()
+
+    db.session.delete(site)
+    db.session.commit()
+
+    return {'message': 'Deleted'}
+
+
 @app.errorhandler(Exception)
 def server_error(e):
     """Display error page. Log error message with stack trace."""
