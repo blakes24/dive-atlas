@@ -1,7 +1,7 @@
 """Seed file to make sample data for dive db."""
 # import reverse_geocode
 
-from models import db, User, Dive_site
+from models import db, User, Dive_site, Bucket_list_site
 from app import app
 
 from sqlalchemy.schema import DropTable
@@ -40,7 +40,7 @@ db.session.add(lighthouse)
 
 db.session.commit()
 
-# bl_site = Bucket_list_site(dive_site_id=lighthouse.id, user_id=diver1.id)
+bl_site = Bucket_list_site(dive_site_id=lighthouse.id, user_id=diver1.id)
 
-# db.session.add(bl_site)
-# db.session.commit()
+db.session.add(bl_site)
+db.session.commit()

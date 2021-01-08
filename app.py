@@ -7,8 +7,8 @@ from flask import Flask, render_template, flash, redirect, session, g, request
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from models import db, connect_db, User, Dive_site, Bucket_list_site
-from forms import UserAddForm, LoginForm
+from models import db, connect_db, User, Dive_site, Bucket_list_site, Journal_entry
+from forms import UserAddForm, LoginForm, JournalSiteForm
 
 from dotenv import load_dotenv
 
@@ -197,37 +197,88 @@ def show_site(site_id):
     return render_template("site-detail.html", site=site)
 
 
-@app.route('/bucketlist', methods=["GET", "POST"])
+@app.route("/bucketlist", methods=["GET", "POST"])
 def add_bucketlist_site():
     """Add site to user's bucket list."""
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    if request.method == 'POST':
-        dive_site_id = request.json['id']
+    if request.method == "POST":
+        dive_site_id = request.json["id"]
         site = Dive_site.query.get(dive_site_id)
         if site in g.user.bucket_list:
-            return {'message': 'This site is already in your bucket list.'}
+            return {"message": "This site is already in your bucket list."}
         bl_site = Bucket_list_site(dive_site_id=dive_site_id, user_id=g.user.id)
         db.session.add(bl_site)
         db.session.commit()
-        return {'message': 'Site added to bucket list'}
+        return {"message": "Site added to bucket list"}
 
     sites = g.user.bucket_list
 
-    return render_template('bucket-list.html', sites=sites)
+    return render_template("bucket-list.html", sites=sites)
 
 
 @app.route("/bucketlist/<int:site_id>/delete", methods=["POST"])
 def delete_bucketlist_site(site_id):
     """Deletes a site from bucket list and returns deleted message."""
-    site = Bucket_list_site.query.filter(Bucket_list_site.user_id == g.user.id, Bucket_list_site.dive_site_id == site_id).first()
+    site = Bucket_list_site.query.filter(
+        Bucket_list_site.user_id == g.user.id, Bucket_list_site.dive_site_id == site_id
+    ).first()
 
     db.session.delete(site)
     db.session.commit()
 
-    return {'message': 'Deleted'}
+    return {"message": "Deleted"}
+
+
+@app.route("/journal")
+def show_dive_journal():
+    """Show sites in users dive journal."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    sites = g.user.dive_journal
+
+    return render_template("dive-journal.html", sites=sites)
+
+
+@app.route("/journal/<int:site_id>/add", methods=["GET", "POST"])
+def add_journal_site(site_id):
+    """Add site to user's dive journal."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = JournalSiteForm()
+    site = Dive_site.query.get(site_id)
+    entry = Journal_entry.query.filter(
+        Journal_entry.user_id == g.user.id, Journal_entry.dive_site_id == site_id
+    ).first()
+    if entry in g.user.dive_journal:
+        flash("Site already in dive journal.", "danger")
+        return redirect(f"/sites/{site_id}")
+
+    if form.validate_on_submit():
+        description = form.description.data
+        notes = form.notes.data
+        rating = form.rating.data
+
+        entry = Journal_entry(
+            dive_site_id=site_id,
+            description=description,
+            notes=notes,
+            rating=rating,
+            user_id=g.user.id,
+        )
+        db.session.add(entry)
+        db.session.commit()
+
+        flash("Site added to dive journal.", "success")
+        return redirect("/")
+
+    return render_template("journal-form.html", form=form, site=site)
 
 
 @app.errorhandler(Exception)

@@ -24,6 +24,12 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
 
     bucket_list = db.relationship("Dive_site", secondary="bucket_list_sites")
+    dive_journal = db.relationship(
+        "Journal_entry",
+        back_populates="user",
+        cascade="all, delete, delete-orphan",
+        single_parent=True,
+    )
 
     def __repr__(self):
         """Display id, username, and email."""
@@ -65,12 +71,38 @@ class Dive_site(db.Model):
     description = db.Column(db.Text)
     location = db.Column(db.Text, nullable=False)
 
+    journal_entries = db.relationship("Journal_entry")
+
 
 class Bucket_list_site(db.Model):
     """Dive site in user's bucket list."""
 
-    __tablename__ = 'bucket_list_sites'
+    __tablename__ = "bucket_list_sites"
 
     id = db.Column(db.Integer, primary_key=True)
-    dive_site_id = db.Column(db.Integer, db.ForeignKey('dive_sites.id', ondelete='CASCADE'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    dive_site_id = db.Column(
+        db.Integer, db.ForeignKey("dive_sites.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+
+class Journal_entry(db.Model):
+    """Dive journal entry."""
+
+    __tablename__ = "journal_entries"
+
+    id = db.Column(db.Integer, primary_key=True)
+    dive_site_id = db.Column(
+        db.Integer, db.ForeignKey("dive_sites.id", ondelete="CASCADE"), nullable=False
+    )
+    notes = db.Column(db.Text)
+    description = db.Column(db.Text)
+    rating = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    user = db.relationship("User")
+    dive_site = db.relationship("Dive_site")
