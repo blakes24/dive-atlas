@@ -608,6 +608,32 @@ class ViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Access unauthorized.", html)
 
+    def test_journal_delete(self):
+        """Does it delete a dive journal entry?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u.id
+
+            resp = c.post("/journal/1/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Site deleted.', html)
+            self.assertNotIn('Site1', html)
+
+    def test_journal_delete_unauthorized(self):
+        """Does it redirect the user if they are not logged in?"""
+        self.setup_dive_journal()
+
+        with self.client as c:
+            resp = c.post("/journal/1/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
     def test_error_handler(self):
         """Does it display error page?"""
         with self.client as c:
