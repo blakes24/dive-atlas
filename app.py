@@ -308,6 +308,26 @@ def remove_site(entry_id):
     return redirect('/journal')
 
 
+@app.route('/journal/<int:entry_id>/edit', methods=["GET", "POST"])
+def edit_journal(entry_id):
+    """Edit dive journal entry."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    entry = Journal_entry.query.get_or_404(entry_id)
+    form = JournalSiteForm(obj=entry)
+
+    if form.validate_on_submit():
+        form.populate_obj(entry)
+        db.session.add(entry)
+        db.session.commit()
+        flash("Site updated.", "success")
+        return redirect(f'/journal/{entry.id}')
+
+    return render_template('journal-form.html', form=form, site=entry.dive_site)
+
+
 @app.errorhandler(Exception)
 def server_error(e):
     """Display error page. Log error message with stack trace."""
