@@ -281,6 +281,18 @@ def add_journal_site(site_id):
     return render_template("journal-form.html", form=form, site=site)
 
 
+@app.route('/journal/<int:entry_id>')
+def show_journal_detail(entry_id):
+    """Show dive journal site detail."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    entry = Journal_entry.query.get_or_404(entry_id)
+
+    return render_template('journal-detail.html', entry=entry)
+
+
 @app.errorhandler(Exception)
 def server_error(e):
     """Display error page. Log error message with stack trace."""
