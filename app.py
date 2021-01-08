@@ -293,6 +293,21 @@ def show_journal_detail(entry_id):
     return render_template('journal-detail.html', entry=entry)
 
 
+@app.route('/journal/<int:entry_id>/delete', methods=["POST"])
+def remove_site(entry_id):
+    """Delete a dive site from journal."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    entry = Journal_entry.query.get(entry_id)
+    db.session.delete(entry)
+    db.session.commit()
+
+    flash("Site deleted.", "danger")
+    return redirect('/journal')
+
+
 @app.errorhandler(Exception)
 def server_error(e):
     """Display error page. Log error message with stack trace."""
