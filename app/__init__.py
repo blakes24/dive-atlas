@@ -1,3 +1,5 @@
+"""Application."""
+
 import os
 import requests
 import logging
@@ -7,30 +9,23 @@ from flask import Flask, render_template, flash, redirect, session, g, request
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from models import db, connect_db, User, Dive_site, Bucket_list_site, Journal_entry
+from models import  User, db, connect_db, Dive_site, Bucket_list_site, Journal_entry
 from forms import UserAddForm, LoginForm, JournalSiteForm
 
 from dotenv import load_dotenv
+from config import config
 
-load_dotenv()
 
 app = Flask(__name__)
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format=f"%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s",
-)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_ECHO"] = False
-app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "shhhItsASecret123")
-toolbar = DebugToolbarExtension(app)
+def create_app(config_name):
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+    connect_db(app)
+    return app
 
-connect_db(app)
-
-
+# attach routes and custom error pages here
 @app.before_request
 def add_user_to_g():
     """If logged in, add user to Flask g."""
@@ -44,7 +39,7 @@ def add_user_to_g():
 @app.route("/")
 def home():
     """Render home page."""
-    return render_template("index.html")
+    return render_template('index.html')
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -76,7 +71,6 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Handle user login."""
-
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -152,7 +146,7 @@ def delete_user():
 
 @app.route("/sites/search", methods=["POST"])
 def get_sites():
-    """Send request to api to get list of dive sites based on provided search parameters"""
+    """Send request to api to get list of dive sites based on provided search parameters."""
     params = request.json
 
     res = requests.get("http://api.divesites.com", params=params)
@@ -165,7 +159,6 @@ def get_sites():
 @app.route("/sites/<int:site_id>")
 def show_site(site_id):
     """Show site details"""
-
     site = Dive_site.query.get(site_id)
 
     if not site:
@@ -292,7 +285,6 @@ def show_journal_detail(entry_id):
 
     return render_template('journal-detail.html', entry=entry)
 
-
 @app.route('/journal/<int:entry_id>/delete', methods=["POST"])
 def remove_site(entry_id):
     """Delete a dive site from journal."""
@@ -306,7 +298,6 @@ def remove_site(entry_id):
 
     flash("Site deleted.", "danger")
     return redirect('/journal')
-
 
 @app.route('/journal/<int:entry_id>/edit', methods=["GET", "POST"])
 def edit_journal(entry_id):
@@ -326,7 +317,6 @@ def edit_journal(entry_id):
         return redirect(f'/journal/{entry.id}')
 
     return render_template('journal-form.html', form=form, site=entry.dive_site)
-
 
 @app.errorhandler(Exception)
 def server_error(e):

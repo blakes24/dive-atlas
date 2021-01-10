@@ -4,17 +4,10 @@
 #
 #    python -m unittest tests/test_models.py
 
-from app import app
-
+from app import create_app
 from unittest import TestCase
 from sqlalchemy import exc
 from models import db, User, Dive_site, Bucket_list_site, Journal_entry
-
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
-
-# Create tables
-db.create_all()
 
 
 class ModelTestCase(TestCase):
@@ -22,6 +15,8 @@ class ModelTestCase(TestCase):
 
     def setUp(self):
         """Create test client, add sample data."""
+        self.app = create_app('testing')
+        self.client = self.app.test_client()
         db.drop_all()
         db.create_all()
 
@@ -37,10 +32,9 @@ class ModelTestCase(TestCase):
         u = User.query.get(1111)
         self.u = u
 
-        self.client = app.test_client()
-
     def tearDown(self):
-        db.session.rollback()
+        db.session.remove()
+        db.drop_all()
 
     def test_user_model(self):
         """Does basic model work?"""

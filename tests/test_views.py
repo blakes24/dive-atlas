@@ -4,20 +4,9 @@
 #
 #    FLASK_ENV=production python -m unittest tests/test_views.py
 
-from app import app
-
+from app import create_app
 from unittest import TestCase
-
 from models import db, User, Dive_site, Bucket_list_site, Journal_entry
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///dive_test"
-
-
-db.create_all()
-
-# Don't have WTForms use CSRF
-
-app.config["WTF_CSRF_ENABLED"] = False
 
 
 class ViewTestCase(TestCase):
@@ -25,10 +14,10 @@ class ViewTestCase(TestCase):
 
     def setUp(self):
         """Create test client, add sample data."""
+        self.app = create_app('testing')
+        self.client = self.app.test_client()
         db.drop_all()
         db.create_all()
-
-        self.client = app.test_client()
 
         u = User.signup(
             email="test@test.com",
@@ -51,7 +40,8 @@ class ViewTestCase(TestCase):
         db.session.commit()
 
     def tearDown(self):
-        db.session.rollback()
+        db.session.remove()
+        db.drop_all()
 
     ##### Test main page views #####
 

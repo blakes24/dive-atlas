@@ -6,12 +6,11 @@ from flask_sqlalchemy import SQLAlchemy
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 
-
 def connect_db(app):
-    """Connect this database to Flask app."""
+    """Connect to the database and create all tables."""
     db.app = app
     db.init_app(app)
-
+    db.create_all()
 
 class User(db.Model):
     """User info."""
