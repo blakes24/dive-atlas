@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-center">Dive Journal</h1>
-
-<div class="container">
-    <ul id="site-list">
-        {% for site in sites %}
-        <li><a href="/journal/{{site.id}}">{{site.dive_site.name}}</a></li>
-        {% endfor %}
-    </ul>
+<div class="container-fluid journal">
+    <h1 class="text-center top">Dive Journal</h1>
+    <div class="container list-box">
+        <ul id="site-list list-group list-group-flush">
+            {% for site in sites %}
+            <li class="list-group-item"><a href="/journal/{{site.id}}">{{site.dive_site.name}} ({{site.dive_site.location}})</a></li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endblock %}

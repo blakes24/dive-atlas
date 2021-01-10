@@ -3,7 +3,7 @@ mapboxgl.accessToken = mapToken;
 // create new map
 let map = new mapboxgl.Map({
 	container : 'map',
-	style     : 'mapbox://styles/blakes24/cki20buzh0okk19pqhm3v6qa2'
+	style     : 'mapbox://styles/blakes24/ckjoq7xhd1bgc19lljdhgtpod'
 });
 
 // Add zoom and rotation controls to the map.
@@ -26,7 +26,9 @@ map.on('dblclick', (e) => {
 
 //touch screen: place marker on point where map is touched
 map.on('touchstart', (e) => {
-	dropPin.setLngLat(e.lngLat).addTo(map);
+	setTimeout(() => {
+		dropPin.setLngLat(e.lngLat).addTo(map);
+	}, 100);
 });
 
 // gets location of dropPin and returns nearby dive sites
