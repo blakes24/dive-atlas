@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-center">Looks like something went wrong.</h1>
-<h4 class="text-center"><a href="/">Click Here</a> to go to the Home Page</h4> 
+<div class="container error">
+    <div>
+        <h1 class="text-center">Looks like something went wrong.</h1>
+        <img src="/static/img/sharks.jpg" alt="error" class="err-img">
+        <h4 class="text-center my-2"><a href="/">Click Here</a> to go back to safety.</h4>
+    </div>
+</div>
+
 {% endblock %}

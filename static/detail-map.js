@@ -3,7 +3,7 @@ mapboxgl.accessToken = mapToken;
 // create new map
 let map = new mapboxgl.Map({
 	container : 'detail-map',
-	style     : 'mapbox://styles/blakes24/cki20buzh0okk19pqhm3v6qa2'
+	style     : 'mapbox://styles/blakes24/ckjoq7xhd1bgc19lljdhgtpod'
 });
 
 const lat = parseFloat($('.lat').text());

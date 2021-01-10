@@ -1,19 +1,34 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-center">Dive Atlas</h1>
-<p class="text-center">Use the search bar or drop a pin on the map to find nearby dive sites.</p>
-<div class="container text-center">
-    <form class="form-inline justify-content-center" id="search-form">
-        <input required class="form-control" type="search" placeholder="Search" aria-label="Search" id="search-text">
-        <button class="btn btn-info" type="submit">Search</button>
-    </form>
-    <div class="container justify-content-center d-flex m-1 ">
-        <div id='map' style='width: 800px; height: 400px;'></div>
+{% if not g.user %}
+<div class="jumbotron jumbotron-fluid d-flex align-items-center">
+    <div class="container mb-5 pb-5 text-center">
+        <h1 class="display-4">Dive Atlas</h1>
+        <p class="lead">Dive in to find your next great adventure.</p>
+        <hr>
+        <div>
+            <p class="lead"><a href="/signup"> Sign Up</a> to create a bucket list, review dive sites, and use the Dive Journal feature to keep track of your favorite dives. </p>
+            <p class="lead">Or scroll down to the <a href="#explore">world map</a> below to discover new dive sites.</p>
+        </div>
     </div>
-    <button class="btn btn-info" id="map-search">Search Map</button>
 </div>
-<div class="container my-2">
+{% endif %}
+<div class="container-fluid text-center mt-3">
+    <h2 id="explore">Explore</h2>
+    <p class="text-center">Use the search bar or drop a pin on the map to find nearby dive sites.</p>
+    <div class="container col-sm-6 justify-content-center">
+        <form class="form" id="search-form">
+            <input required class="form-control" type="search" placeholder="Search" aria-label="Search" id="search-text">
+        </form>
+    </div>
+    
+    <div class="container-fluid mx-0 my-2 p-0">
+        <div id='map'></div>
+    </div>
+    <button class="btn btn-primary" id="map-search">Search Map</button>
+</div>
+<div class="container my-2" id="search-results">
     <div id="results" class="text-center"></div>
     <ul id="site-list"></ul>
 </div>

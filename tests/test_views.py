@@ -169,7 +169,7 @@ class ViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('<a class="nav-link" href="/login">Sign In</a>', html)
+            self.assertIn('<a class="nav-link" href="/login">Log In</a>', html)
             self.assertNotIn(
                 '<a class="nav-link" href="/bucketlist">Bucket List</a>', html
             )
@@ -188,7 +188,7 @@ class ViewTestCase(TestCase):
             self.assertIn(
                 '<a class="nav-link" href="/bucketlist">Bucket List</a>', html
             )
-            self.assertNotIn('<a class="nav-link" href="/login">Sign In</a>', html)
+            self.assertNotIn('<a class="nav-link" href="/login">Log In</a>', html)
 
     def test_edit_user(self):
         """Does it edit a user's info?"""
@@ -334,7 +334,7 @@ class ViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('<h1 class="text-center">Site1</h1>', html)
+            self.assertIn('Site1</h1>', html)
 
     def test_show_site_api(self):
         """Does it get site info from api, add to database, and display details?"""
@@ -346,7 +346,7 @@ class ViewTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertEqual(len(Dive_site.query.all()), 2)
-            self.assertIn('<h1 class="text-center">Treasure Island</h1>', html)
+            self.assertIn('Treasure Island</h1>', html)
 
     def test_show_site_logged_out(self):
         """Does it display logged out site details view?"""
@@ -507,8 +507,8 @@ class ViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("Site1</a>", html)
-            self.assertNotIn("Site2</a>", html)
+            self.assertIn("Site1 (somewhere)</a>", html)
+            self.assertNotIn("Site2 (someplace)</a>", html)
 
     def test_show_journal_unauthorized(self):
         """Does it redirect the user if they are not logged in?"""
@@ -594,7 +594,7 @@ class ViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('<h1 class="text-center">Site1</h1>', html)
+            self.assertIn('Site1</h1>', html)
             self.assertIn('<p>ok</p>', html)
 
     def test_journal_detail_unauthorized(self):

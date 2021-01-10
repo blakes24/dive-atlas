@@ -1,0 +1,159 @@
+html {
+	height: 100%;
+}
+
+body {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+}
+
+h2::before {
+	display: block;
+	content: " ";
+	margin-top: -2em;
+	height: 2em;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.container-fluid {
+	padding: 10px 0;
+}
+
+.top {
+	margin-top: 0.3rem;
+}
+
+#map {
+	width: 100%;
+	height: 60vh;
+}
+
+.jumbotron {
+	background-image: url("img/ocean-bg2.jpg");
+	background-size: cover;
+	color: white;
+	height: 100vh;
+}
+
+#explore {
+	color: #ff7944;
+}
+
+.title {
+	color: #ff7944;
+}
+
+#search-results {
+	height: 20vh;
+	overflow: scroll;
+}
+
+.form-title {
+	text-align: center;
+}
+
+ul,
+li {
+	list-style-type: none;
+	list-style-position: inside;
+	margin: 0;
+	padding: 0;
+}
+
+.alert {
+	margin: 0;
+}
+
+.btn-danger {
+	background-color: #2479a7;
+	border: #2479a7;
+}
+
+.btn-danger:hover {
+	background-color: #095177;
+}
+
+.btn-danger:focus {
+	background-color: #2479a7;
+}
+
+.btn-primary {
+	margin: 10px 0;
+	background-color: #ff7944;
+	border-color: #ff7944;
+}
+
+.btn-primary:hover {
+	background-color: #ff5a31;
+	border-color: #ff7944;
+}
+
+.btn-primary:focus {
+	background-color: #ff7944;
+	border-color: #ff7944;
+}
+
+.navbar {
+	background-color: #095177;
+}
+
+a {
+	color: #ff7944;
+}
+
+a:hover {
+	color: #ff5a31;
+}
+
+.bucket {
+	background-image: url("img/fish.jpg");
+	background-size: cover;
+	background-position: center;
+	height: 95vh;
+}
+
+.journal {
+	background-image: url("img/turtle3.jpg");
+	background-size: cover;
+	background-position: center;
+	color: white;
+	height: 95vh;
+}
+
+.list-box {
+	margin-top: 1rem;
+	overflow: scroll;
+	height: 80%;
+}
+
+.list-group-item {
+	background-color: #ffffffbf;
+	margin: 10px;
+}
+
+.bi-star-fill {
+	color: #ff7944;
+}
+
+.error {
+	margin-top: 3rem;
+	margin-bottom: 3rem;
+}
+
+.err-img {
+	width: 100%;
+}
+
+footer {
+	background-color: #095177;
+	color: white;
+	margin-top: auto;
+	padding: 5px;
+}
+
+footer > p {
+	margin: 0;
+}
