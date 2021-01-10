@@ -4,5 +4,4 @@ __pycache__
 .vscode
 .DS_Store
 .coverage
-app/static/config.js
 record.log
