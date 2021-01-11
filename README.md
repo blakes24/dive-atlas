@@ -3,6 +3,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/blakes24/dive-atlas/badge.svg?branch=main)](https://coveralls.io/github/blakes24/dive-atlas?branch=main)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a773a8e737909036574e/maintainability)](https://codeclimate.com/github/blakes24/dive-atlas/maintainability)
 
+[https://dive-atlas.herokuapp.com/](https://dive-atlas.herokuapp.com/)
+
 ## Description
 This app helps scuba divers find new dive sites around the world and keep a record of their favorite spots.
 
@@ -13,7 +15,7 @@ This app helps scuba divers find new dive sites around the world and keep a reco
 
 - Create a .env file in the main directory that contains:
 	- `DEV_DATABASE_URL=postgres:///your_database_name`
-	- `PROD_DATABASE_URL=postgres:///your_database_name`
+	- `DATABASE_URL=postgres:///your_database_name`
 	- `TEST_DATABASE_URL=postgres:///your_database_name`
 	- `SECRET_KEY=yourSecretKeyHere`
 

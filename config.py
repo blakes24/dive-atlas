@@ -5,7 +5,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
-    WTF_CSRF_ENABLED = False
 
     @staticmethod
     def init_app(app):
@@ -21,12 +20,13 @@ class TestingConfig(Config):
     """Configurations for Testing Environment."""
 
     TESTING = True
+    WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'postgresql:///dive_test'
 
 class ProductionConfig(Config):
     """Configurations for Production Environment."""
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get('PROD_DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 config = {
     'development': DevelopmentConfig,

@@ -94,3 +94,5 @@ $('#delete').on('click', async function deleteSite() {
 	$(this).closest('li').remove();
 	$('#msg').append(alert);
 });
+
+const mapToken = 'pk.eyJ1IjoiYmxha2VzMjQiLCJhIjoiY2toeHh3eXZsMDYzdDJzbDI5cnU3b2YwciJ9.YPfioQRftDU9m5783jldxA';
