@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="container-fluid forms">
+    <div class="row justify-content-md-center top mx-1">
+        <div class="col-md-7 col-lg-5">
+            <h2 class="form-title">Log In</h2>
+            <form method="POST" id="user_form">
+            {{ form.hidden_tag() }}
 
-  <div class="row justify-content-md-center top">
-  <div class="col-md-7 col-lg-5">
-    <h2 class="form-title">Log In</h2>
-    <form method="POST" id="user_form">
-      {{ form.hidden_tag() }}
+            {% for field in form if field.widget.input_type != 'hidden' %}
+                {{ field.label }}
+                {% for error in field.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+                {{ field(placeholder=field.label.text, class="form-control") }}
+            {% endfor %}
 
-      {% for field in form if field.widget.input_type != 'hidden' %}
-        {{ field.label }}
-        {% for error in field.errors %}
-          <span class="text-danger">{{ error }}</span>
-        {% endfor %}
-        {{ field(placeholder=field.label.text, class="form-control") }}
-      {% endfor %}
-
-      <button class="btn btn-primary">Submit</button>
-    </form>
-  </div>
+            <button class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
