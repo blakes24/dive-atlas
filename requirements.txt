@@ -15,9 +15,11 @@ decorator==4.4.2
 dnspython==2.0.0
 docopt==0.6.2
 email-validator==1.1.2
+flake8==3.8.4
 Flask==1.1.2
 Flask-Bcrypt==0.7.1
 Flask-DebugToolbar==0.11.0
+Flask-Mail==0.9.1
 Flask-SQLAlchemy==2.4.4
 Flask-WTF==0.14.3
 gunicorn==20.0.4
@@ -39,7 +41,9 @@ pickleshare==0.7.5
 prompt-toolkit==3.0.8
 psycopg2-binary==2.8.6
 ptyprocess==0.6.0
+pycodestyle==2.6.0
 pycparser==2.20
+pyflakes==2.2.0
 Pygments==2.7.3
 pylint==2.6.0
 python-coveralls==2.9.3

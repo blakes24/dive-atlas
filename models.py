@@ -21,6 +21,7 @@ class User(db.Model):
     username = db.Column(db.Text, nullable=False, unique=True)
     email = db.Column(db.Text, nullable=False, unique=True)
     password = db.Column(db.Text, nullable=False)
+    confirmed = db.Column(db.Boolean, nullable=False, default=False)
 
     bucket_list = db.relationship("Dive_site", secondary="bucket_list_sites")
     dive_journal = db.relationship(

@@ -18,6 +18,10 @@ This app helps scuba divers find new dive sites around the world and keep a reco
 	- `DATABASE_URL=postgres:///your_database_name`
 	- `TEST_DATABASE_URL=postgres:///your_database_name`
 	- `SECRET_KEY=yourSecretKeyHere`
+    - `MAIL_SERVER=smtp.your_email_server`
+    - `MAIL_USERNAME=your_email_username`
+    - `MAIL_PASSWORD=your_email_password`
+    - `SECURITY_PASSWORD_SALT=hard_to_guess_string`
 
 - Set up a virtual environment:
 	- `python3 -m venv .env`

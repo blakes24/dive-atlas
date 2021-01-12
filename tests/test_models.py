@@ -26,6 +26,7 @@ class ModelTestCase(TestCase):
             password="password",
         )
         u.id = 1111
+        u.confirmed = True
         db.session.add(u)
         db.session.commit()
 

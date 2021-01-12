@@ -1,16 +1,21 @@
 """Seed file to make sample data for dive db."""
-# import reverse_geocode
 
-from models import db, User, Dive_site, Bucket_list_site
+from config import config
 from app import app
+from models import db, connect_db, User, Dive_site, Bucket_list_site
 
 from sqlalchemy.schema import DropTable
 from sqlalchemy.ext.compiler import compiles
+
+app.config.from_object(config['development'])
 
 
 @compiles(DropTable, "postgresql")
 def _compile_drop_table(element, compiler, **kwargs):
     return compiler.visit_drop_table(element) + " CASCADE"
+
+
+connect_db(app)
 
 
 # Drop then create all tables
@@ -20,6 +25,7 @@ db.create_all()
 # Add user
 diver1 = User.signup(username="diver1", email="diver1@test.com", password="testerpw")
 
+diver1.confirmed = True
 
 # Add new objects to session
 db.session.add(diver1)
