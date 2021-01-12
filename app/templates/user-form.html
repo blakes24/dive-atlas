@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-  <div class="row justify-content-md-center top">
+<div class="container-fluid forms">
+  <div class="row justify-content-md-center top mx-1">
     <div class="col-md-7 col-lg-5">
       <h2 class="form-title">Edit Profile</h2>
       <form method="POST" id="user_form">
@@ -28,15 +28,15 @@
 
         <div class="edit-btn-area mt-2">
           <button class="btn btn-primary">Edit this user!</button>
-          <a href="/" class="btn btn-outline-secondary">Cancel</a>
+          <a href="/" class="btn btn-secondary">Cancel</a>
         </div>
       </form>
       <div class="mt-5 text-center">
         <form method="POST" action="/user/delete">
-            <button class="btn btn-danger px-5">Delete Profile</button>
+            <button class="btn btn-warning px-5">Delete Profile</button>
           </form>
       </div>
     </div>
   </div>
-
+</div>
 {% endblock %}

@@ -7,6 +7,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	margin: 0;
+	background-color: #e1f9ff;
 }
 
 h2::before {
@@ -53,6 +54,7 @@ h2::before {
 
 .form-title {
 	text-align: center;
+	margin-top: 1em;
 }
 
 ul,
@@ -108,13 +110,8 @@ a:hover {
 	color: #ff5a31;
 }
 
-.bucket {
-	background-image: url("img/fish.jpg");
-	background-size: cover;
-	background-position: center;
-	height: 95vh;
-}
-
+.forms,
+.bucket,
 .journal {
 	background-image: url("img/turtle3.jpg");
 	background-size: cover;

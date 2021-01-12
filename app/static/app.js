@@ -40,8 +40,7 @@ function setMarkers(sites) {
 		let myLatlng = new mapboxgl.LngLat(parseFloat(site.lng), parseFloat(site.lat));
 		let marker = new mapboxgl.Marker({
 			color : '#F78154',
-			// color : '#ff5356',
-			scale : 0.6
+			scale : 0.8
 		})
 			.setLngLat(myLatlng)
 			.setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<a href="/sites/${site.id}">${site.name}</a>`))
