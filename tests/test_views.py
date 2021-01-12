@@ -4,9 +4,11 @@
 #
 #    FLASK_ENV=production python -m unittest tests/test_views.py
 
+from flask_mail import Mail
 from app import create_app
 from unittest import TestCase
 from models import db, User, Dive_site, Bucket_list_site, Journal_entry
+from verify import generate_token, send_email
 
 
 class ViewTestCase(TestCase):
@@ -25,6 +27,7 @@ class ViewTestCase(TestCase):
             password="password",
         )
         u.id = 1111
+        u.confirmed = True
         db.session.add(u)
         db.session.commit()
 
@@ -36,8 +39,12 @@ class ViewTestCase(TestCase):
             username="tester22",
             password="password22",
         )
+        u2.id = 2222
         db.session.add(u2)
         db.session.commit()
+
+        u2 = User.query.get(2222)
+        self.u2 = u2
 
     def tearDown(self):
         db.session.remove()
@@ -60,7 +67,8 @@ class ViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("testyuser</a>", html)
+            self.assertIn("<h1>Welcome testyuser!</h1>", html)
+            self.assertIn("You have not confirmed your account.", html)
 
     def test_signup_invalid_name(self):
         """Will user get warning if username or email already exists?"""
@@ -111,7 +119,6 @@ class ViewTestCase(TestCase):
 
     def test_login(self):
         """Can user log in?"""
-
         with self.client as c:
             resp = c.post(
                 "/login",
@@ -125,7 +132,6 @@ class ViewTestCase(TestCase):
 
     def test_login_invalid(self):
         """Does user get error message for invalid credentials?"""
-
         with self.client as c:
             resp = c.post(
                 "/login",
@@ -137,9 +143,21 @@ class ViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Invalid credentials.", html)
 
+    def test_login_unconfirmed(self):
+        """Does it redirect unconfirmed user?"""
+        with self.client as c:
+            resp = c.post(
+                "/login",
+                data={"username": "tester22", "password": "password22"},
+                follow_redirects=True,
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("<p>You have not confirmed your account.", html)
+
     def test_logout(self):
         """Can user log out?"""
-
         # change the session to mimic logging in
         with self.client as c:
             with c.session_transaction() as sess:
@@ -153,7 +171,6 @@ class ViewTestCase(TestCase):
 
     def test_home_logged_out(self):
         """Does it display logged out navbar?"""
-
         with self.client as c:
             resp = c.get("/", follow_redirects=True)
             html = resp.get_data(as_text=True)
@@ -166,7 +183,6 @@ class ViewTestCase(TestCase):
 
     def test_home_logged_in(self):
         """Does it display logged in navbar?"""
-
         with self.client as c:
             with c.session_transaction() as sess:
                 sess["user_id"] = self.u.id
@@ -179,6 +195,7 @@ class ViewTestCase(TestCase):
                 '<a class="nav-link" href="/bucketlist">Bucket List</a>', html
             )
             self.assertNotIn('<a class="nav-link" href="/login">Log In</a>', html)
+
 
     def test_edit_user(self):
         """Does it edit a user's info?"""
@@ -676,3 +693,100 @@ class ViewTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 500)
             self.assertIn("Looks like something went wrong.", html)
+
+    ##### Test email confirmation views #####
+
+    def test_confirm_message(self):
+        """Does it show email confirmation message?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u2.id
+
+            resp = c.get("/confirm", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<p>You have not confirmed your account.', html)
+
+    def test_confirm_message_unauthorized(self):
+        """Does it show log in message?"""
+        with self.client as c:
+            resp = c.get("/confirm", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Log in then click resend', html)
+
+    def test_resend_confirmation(self):
+        """Does it show email confirmation message?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u2.id
+
+            resp = c.get("/resend", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('A new confirmation email has been sent.', html)
+
+    def test_resend_confirmation_unauthorized(self):
+        """Does it show log in message?"""
+        with self.client as c:
+            resp = c.get("/resend", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Log in then click resend', html)
+
+    def test_confirm_email(self):
+        """Does it show email confirmation message?"""
+        token = generate_token(self.u2.email)
+        # self.u2.confirmed = False
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u2.id
+
+            resp = c.get(f"/confirm/{token}", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('You have confirmed your account.', html)
+
+    def test_confirm_email_completed(self):
+        """Does it show account already confirmed?"""
+        token = generate_token(self.u.email)
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u.id
+
+            resp = c.get(f"/confirm/{token}", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Account already confirmed.', html)
+
+    def test_confirm_email_invalid(self):
+        """Does it show invalid link message?"""
+        token = generate_token('fake')
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.u2.id
+
+            resp = c.get(f"/confirm/{token}", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('The confirmation link is invalid', html)
+
+    def test_send_email(self):
+        """Does it send an email?"""
+        with self.app.test_request_context('/'):
+            mail = Mail(self.app)
+            with mail.record_messages() as outbox:
+                send_email(to='email', subject='testing', template='test')
+
+                self.assertEqual(len(outbox), 1)
+                self.assertEqual(outbox[0].subject, "testing")

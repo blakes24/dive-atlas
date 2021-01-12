@@ -26,7 +26,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/#explore">Map</a>
                     </li>
-                {% if g.user %}
+                {% if g.user.confirmed %}
                     <li class="nav-item">
                         <a class="nav-link" href="/bucketlist">Bucket List</a>
                     </li>
@@ -45,7 +45,7 @@
                     </li>
                 {% endif %}
             </ul>
-            {% if g.user %}
+            {% if g.user.confirmed %}
             <a class="nav-item mr-2" href="/user/edit">{{g.user.username}}</a>
             {% endif %}
         </div>

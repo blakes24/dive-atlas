@@ -5,18 +5,23 @@ import requests
 import logging
 import reverse_geocode
 
-from flask import Flask, render_template, flash, redirect, session, g, request
+from flask import Flask, render_template, flash, redirect, session, g, request, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from flask_mail import Mail, Message
 
-from models import  User, db, connect_db, Dive_site, Bucket_list_site, Journal_entry
+
+from models import User, db, connect_db, Dive_site, Bucket_list_site, Journal_entry
 from forms import UserAddForm, LoginForm, JournalSiteForm
+
 
 from dotenv import load_dotenv
 from config import config
 
 
 app = Flask(__name__)
+
+from verify import generate_token, confirm_token, send_email
 
 
 def create_app(config_name):
@@ -55,10 +60,16 @@ def signup():
                 email=form.email.data,
             )
             db.session.commit()
-            session["user_id"] = user.id
-            flash(f"Welcome {user.username}!", "success")
 
-            return redirect("/")
+            token = generate_token(user.email)
+            confirm_url = url_for('confirm_email', token=token, _external=True)
+            html = render_template('email.html', confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(user.email, subject, html)
+
+            session["user_id"] = user.id
+
+            return redirect('/confirm')
 
         except IntegrityError:
             db.session().rollback()
@@ -66,6 +77,51 @@ def signup():
             return render_template("signup.html", form=form)
 
     return render_template("signup.html", form=form)
+
+
+@app.route('/confirm')
+def confirm_message():
+    """Show confirmation sent message."""
+    if not g.user:
+        flash("Log in then click resend to generate new confirmation email.", "danger")
+
+    user = g.user
+    return render_template('unconfirmed.html', user=user)
+
+
+@app.route('/resend')
+def resend_confirmation():
+    if not g.user:
+        flash("Log in then click resend to generate new confirmation email.", "danger")
+        return redirect("/login")
+
+    token = generate_token(g.user.email)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    html = render_template('email.html', confirm_url=confirm_url)
+    subject = "Please confirm your email"
+    send_email(g.user.email, subject, html)
+    flash('A new confirmation email has been sent.', 'success')
+
+    return redirect('/')
+
+
+@app.route('/confirm/<token>')
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+        user = User.query.filter_by(email=email).first_or_404()
+    except:
+        flash('The confirmation link is invalid or has expired. Enter your email/password to resend confirmation email.', 'danger')
+        return redirect('/login')
+
+    if user.confirmed is True:
+        flash('Account already confirmed.', 'success')
+    else:
+        user.confirmed = True
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Welcome {user.username}! You have confirmed your account. ', 'success')
+    return redirect('/')
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -78,6 +134,9 @@ def login():
 
         if user:
             session["user_id"] = user.id
+            if user.confirmed is False:
+                return redirect('/confirm')
+
             flash(f"Hello, {user.username}!", "success")
             return redirect("/")
 
@@ -89,7 +148,6 @@ def login():
 @app.route("/logout")
 def logout():
     """Handle logout of user."""
-
     session.pop("user_id", None)
 
     flash("You have been logged out.", "success")
@@ -317,6 +375,7 @@ def edit_journal(entry_id):
         return redirect(f'/journal/{entry.id}')
 
     return render_template('journal-form.html', form=form, site=entry.dive_site)
+
 
 @app.errorhandler(Exception)
 def server_error(e):

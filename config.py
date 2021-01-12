@@ -1,10 +1,15 @@
+from dotenv import load_dotenv
 import os
+
+
+load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
+    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT')
 
     @staticmethod
     def init_app(app):
@@ -21,6 +26,7 @@ class TestingConfig(Config):
 
     TESTING = True
     WTF_CSRF_ENABLED = False
+    MAIL_SUPPRESS_SEND = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'postgresql:///dive_test'
 
 class ProductionConfig(Config):
