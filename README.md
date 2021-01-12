@@ -6,7 +6,19 @@
 [https://dive-atlas.herokuapp.com/](https://dive-atlas.herokuapp.com/)
 
 ## Description
-This app helps scuba divers find new dive sites around the world and keep a record of their favorite spots.
+This app helps scuba divers discover new dive sites and keep a record of past dives.
+
+### Features
+**All users can:**
+
+- Use the interactive world map to search for dive sites
+- View dive site descriptions and reviews
+
+**Registered users can:**
+
+- Save dive sites they want to visit in the future to their Bucket List
+- Review dive sites and view reviews from other users
+- Keep track of their favorite dives in their Dive Journal
 
 ## Setup Instructions
 - Clone the repository `https://github.com/blakes24/dive-atlas.git`
@@ -44,6 +56,22 @@ This app helps scuba divers find new dive sites around the world and keep a reco
     
 - To run tests, use the command below:
 	- `FLASK_ENV=production python -m unittest <name-of-python-file>`
+
+## Tech Stack
+
+### Backend
+- Python
+- PostgreSQL
+- Flask
+- SQLAlchemy
+
+### Frontend
+- JavaScript
+- Ajax
+- HTML
+- CSS
+- Bootstrap 4
+- Mapbox GL JS
 
 ### Resources
 - Divestes API: [http://api.divesites.com/docs/](http://api.divesites.com/docs/)
