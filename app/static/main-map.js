@@ -33,10 +33,16 @@ map.on('touchstart', (e) => {
 
 // gets location of dropPin and returns nearby dive sites
 $('#map-search').on('click', async function search() {
+	// check for pin
+	if (dropPin.getLngLat() === undefined) {
+		$('#results').html('<p>Add a pin to map.</p>');
+		return;
+	}
 	// get coords of dropped pin
 	const lng = dropPin.getLngLat().lng;
 	const lat = dropPin.getLngLat().lat;
-	// clear previous search results
+
+	//clear previous search results
 	$('#site-list').html('');
 	clearMarkers();
 
@@ -52,5 +58,10 @@ $('#search-form').on('submit', async function textSearch(e) {
 	// get new search input
 	let str = $('#search-text').val();
 
-	await getSearchResults(str);
+	// check if input is blank
+	if (str.trim().length > 0) {
+		await getSearchResults(str);
+	} else {
+		$('#search-text').val('Enter a search term');
+	}
 });
