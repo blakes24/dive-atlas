@@ -24,18 +24,32 @@ map.on('dblclick', (e) => {
 	dropPin.setLngLat(e.lngLat).addTo(map);
 });
 
-//touch screen: place marker on point where map is touched
-map.on('touchstart', (e) => {
-	setTimeout(() => {
-		dropPin.setLngLat(e.lngLat).addTo(map);
-	}, 100);
-});
+//touch screen: place marker on point where map is touched and held
+let pressTimer;
+
+map
+	.on('touchend', (e) => {
+		clearTimeout(pressTimer);
+		// Clear timeout
+		return false;
+	})
+	.on('touchstart', (e) => {
+		// Set timeout
+		pressTimer = window.setTimeout(function() {
+			dropPin.setLngLat(e.lngLat).addTo(map);
+		}, 500);
+		return false;
+	});
 
 // gets location of dropPin and returns nearby dive sites
 $('#map-search').on('click', async function search() {
+	document.getElementById('map-search').scrollIntoView({ behavior: 'smooth' });
+	$('#results').html('<p>Searching...</p>');
 	// check for pin
 	if (dropPin.getLngLat() === undefined) {
-		$('#results').html('<p>Add a pin to map.</p>');
+		$('#site-list').html('');
+		clearMarkers();
+		$('#results').html('<p>Place a pin on the map to search the area.</p>');
 		return;
 	}
 	// get coords of dropped pin
@@ -52,6 +66,7 @@ $('#map-search').on('click', async function search() {
 // gets search form data snd returns matching dive sites
 $('#search-form').on('submit', async function textSearch(e) {
 	e.preventDefault();
+	$('#results').html('<p>Searching...</p>');
 	// clear previous search results
 	$('#site-list').html('');
 	clearMarkers();
@@ -61,6 +76,7 @@ $('#search-form').on('submit', async function textSearch(e) {
 	// check if input is blank
 	if (str.trim().length > 0) {
 		await getSearchResults(str);
+		document.getElementById('map-search').scrollIntoView({ behavior: 'smooth' });
 	} else {
 		$('#search-text').val('Enter a search term');
 	}
