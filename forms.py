@@ -24,12 +24,12 @@ class JournalSiteForm(FlaskForm):
     description = TextAreaField(
         "Description (public)",
         validators=[Optional()],
-        render_kw={"placeholder": "Share your experience with other users", 'rows': 3},
+        render_kw={"placeholder": "Share your experience with other users"},
     )
     notes = TextAreaField(
         "Notes (private)",
         validators=[Optional()],
-        render_kw={"placeholder": "Just for you, notes will remain private", 'rows': 3},
+        render_kw={"placeholder": "Just for you, notes will remain private"},
     )
     rating = SelectField(
         "Rating",

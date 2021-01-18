@@ -1,13 +1,13 @@
 // sends request to server to call API for dive sites near current coordinates
 async function getSites(lng, lat) {
-	let res = await axios.post(`/sites/search`, { mode: 'sites', lat: lat, lng: lng, dist: 100 });
-	const sites = res.data.sites;
+	$('#results').html('');
 
+	let res = await axios.post(`/sites/search`, { mode: 'sites', lat: lat, lng: lng, dist: 100 });
+
+	const sites = res.data.sites;
 	if (sites.length > 0) {
-		$('#results').html('');
 		makeList(sites);
 		setMarkers(sites);
-		map.setZoom(6);
 	} else {
 		$('#results').html('<p>No sites found within 100 miles of dropped pin.</p>');
 	}
@@ -15,16 +15,17 @@ async function getSites(lng, lat) {
 
 // sends request to API for dive sites matching search input
 async function getSearchResults(str) {
+	$('#results').html('');
+
 	if (str.length < 2) {
 		$('#results').html('<p>Search must contain at least 2 letters.</p>');
 		return;
 	}
 
 	let res = await axios.post(`/sites/search`, { mode: 'search', str: str });
-	const sites = res.data.matches;
 
+	const sites = res.data.matches;
 	if (sites.length > 0) {
-		$('#results').html('');
 		makeList(sites);
 		setMarkers(sites);
 	} else {
@@ -79,7 +80,7 @@ $('#bucket-list-add').on('click', async function addToList() {
 });
 
 // deletes dive site from user's bucket list
-$('.delete').on('click', async function deleteSite() {
+$('#delete').on('click', async function deleteSite() {
 	// get site id
 	const id = $(this).attr('data-id');
 	// send to server

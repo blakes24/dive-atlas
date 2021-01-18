@@ -13,8 +13,8 @@ body {
 h2::before {
 	display: block;
 	content: " ";
-	margin-top: -1.8em;
-	height: 1.8em;
+	margin-top: -2em;
+	height: 2em;
 	visibility: hidden;
 	pointer-events: none;
 }
@@ -33,7 +33,7 @@ h2::before {
 }
 
 .jumbotron {
-	background-image: url("img/ocean-bg3.jpg");
+	background-image: url("img/ocean-bg2.jpg");
 	background-size: cover;
 	color: white;
 	height: 100vh;
@@ -45,15 +45,6 @@ h2::before {
 
 .title {
 	color: #ff7944;
-	margin-top: 1rem;
-}
-
-#map-search {
-	margin-left: 1rem;
-}
-
-#search-form {
-	margin-right: 1rem;
 }
 
 #search-results {
@@ -122,8 +113,7 @@ a:hover {
 .forms,
 .bucket,
 .journal {
-	background-color: #03a8b8;
-	background-image: url("img/seaturtle.jpg");
+	background-image: url("img/turtle3.jpg");
 	background-size: cover;
 	background-position: center;
 	color: white;
@@ -163,39 +153,4 @@ footer {
 
 footer > p {
 	margin: 0;
-}
-
-@media (max-width: 575.98px) {
-	.search-con {
-		padding: 0;
-	}
-
-	.title {
-		margin-top: 0;
-		margin-bottom: 0;
-	}
-
-	#map-search {
-		padding: 0 6px;
-		margin: 0;
-		font-size: 14px;
-	}
-
-	#search-form {
-		margin-bottom: 0;
-		margin-right: 0;
-	}
-
-	#explore {
-		margin-bottom: 2px;
-	}
-
-	p {
-		margin: 0 3px 5px 3px;
-	}
-
-	h2::before {
-		margin-top: -1.6em;
-		height: 1.6em;
-	}
 }
