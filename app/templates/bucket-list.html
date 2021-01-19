@@ -3,11 +3,11 @@
 {% block content %}
 <div class="container-fluid bucket">
     <h1 class="text-center top">Bucket List</h1>
-    <div id="msg"></div>
     <div class="container list-box">
+        <div id="msg"></div>
         <ul id="site-list list-group list-group-flush">
             {% for site in sites %}
-            <li class="list-group-item"><a href="/sites/{{site.id}}">{{site.name}}</a> <span><button class="btn btn-sm btn-danger px-2 py-0 float-right" id="delete" data-id="{{site.id}}">Delete</button></span></li>
+            <li class="list-group-item"><a href="/sites/{{site.id}}">{{site.name}}</a> <span><button class="btn btn-sm btn-danger px-2 py-0 float-right delete" data-id="{{site.id}}">Delete</button></span></li>
             {% endfor %}
         </ul>
     </div>
