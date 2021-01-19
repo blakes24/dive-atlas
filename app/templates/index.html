@@ -14,22 +14,32 @@
     </div>
 </div>
 {% endif %}
-<div class="container-fluid text-center mt-3 pb-0">
+<div class="container-fluid text-center my-3">
     <h2 id="explore">Explore</h2>
     <p class="text-center">Use the search bar or drop a pin on the map to find nearby dive sites.</p>
-    <div class="container justify-content-center d-flex search-con">
-        <form class="form mr-2" id="search-form">
-            <input required class="form-control" type="search" placeholder="Search by name" aria-label="Search" id="search-text">
+    <div class="container col-sm-8 col-lg-6 col-xl-4 justify-content-center">
+        <form class="form-inline justify-content-center m-0" id="search-form">
+            <input class="form-control flex-fill mr-2" type="search" placeholder="Search" aria-label="Search" id="search-text">
+            <button type="submit" class="btn btn-primary form-control my-1">Search</button>
         </form>
-        <button class="btn btn-primary mt-0" id="map-search">Search Map</button>
     </div>
     <div class="container-fluid mx-0 my-2 p-0">
-        <div id='map'></div>
+        <div id='map'>
+            <div class="col-sm-4 col-lg-3" id="side-bar">
+                <div class="container-fluid m-0 p-0">
+                    <button class="btn btn-primary btn-block m-0" type="button" data-toggle="collapse" data-target="#list-collapse" aria-expanded="false" aria-controls="list-collapse" id="show-list">
+                        Show List
+                    </button>
+                </div>
+                <div class="container scroll collapse p-0" id="list-collapse">
+                    <div id="results" class="text-center mt-3 px-3">
+                        <p>Enter the name of a dive site in the search bar or add a pin to the map to search by location.</p>
+                    </div>
+                    <ul id="site-list" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-<div id="results" class="text-center"></div>
-<div class="container my-1 mb-1" id="search-results">
-    <ul id="site-list"></ul>
 </div>
 {% endblock %}
 
