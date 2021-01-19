@@ -80,7 +80,7 @@ $('#bucket-list-add').on('click', async function addToList() {
 });
 
 // deletes dive site from user's bucket list
-$('#delete').on('click', async function deleteSite() {
+$('.delete').on('click', async function deleteSite() {
 	// get site id
 	const id = $(this).attr('data-id');
 	// send to server
