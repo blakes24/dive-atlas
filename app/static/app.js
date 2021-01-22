@@ -1,34 +1,48 @@
 // sends request to server to call API for dive sites near current coordinates
 async function getSites(lng, lat) {
-	$('#results').html('');
-
 	let res = await axios.post(`/sites/search`, { mode: 'sites', lat: lat, lng: lng, dist: 100 });
-
 	const sites = res.data.sites;
+
 	if (sites.length > 0) {
+		$('#results').html('');
 		makeList(sites);
 		setMarkers(sites);
+		map.setZoom(6);
+
+		if ($('#list-collapse').hasClass('show')) {
+			$('#show-list').text('Hide List');
+		} else {
+			$('#show-list').text('Show List');
+		}
 	} else {
+		$('#show-list').text('No sites found near pin');
 		$('#results').html('<p>No sites found within 100 miles of dropped pin.</p>');
 	}
 }
 
 // sends request to API for dive sites matching search input
 async function getSearchResults(str) {
-	$('#results').html('');
-
 	if (str.length < 2) {
 		$('#results').html('<p>Search must contain at least 2 letters.</p>');
 		return;
 	}
 
 	let res = await axios.post(`/sites/search`, { mode: 'search', str: str });
-
 	const sites = res.data.matches;
+
 	if (sites.length > 0) {
+		$('#results').html('');
 		makeList(sites);
 		setMarkers(sites);
+		map.setZoom(1);
+
+		if ($('#list-collapse').hasClass('show')) {
+			$('#show-list').text('Hide List');
+		} else {
+			$('#show-list').text('Show List');
+		}
 	} else {
+		$('#show-list').text('No sites found');
 		$('#results').html('<p>No sites found. Try another search.</p>');
 	}
 }
@@ -53,7 +67,7 @@ function setMarkers(sites) {
 // adds dive sites to list
 function makeList(sites) {
 	for (let site of sites) {
-		const li = $(`<li><a href="/sites/${site.id}">${site.name}</a></li>`);
+		const li = $(`<li class="list-group-item sl"><a href="/sites/${site.id}">${site.name}</a></li>`);
 		$('#site-list').append(li);
 	}
 }
@@ -63,6 +77,7 @@ function clearMarkers() {
 	for (let marker of currentMarkers) {
 		marker.remove();
 	}
+	$('#site-list').html('');
 }
 
 // adds current dive site to user's bucket list
